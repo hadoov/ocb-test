@@ -114,9 +114,32 @@ h1 {
   box-shadow: 0 10px 22px rgba(19, 116, 91, 0.2);
 }
 
+.secondary-button {
+  min-height: 48px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0 20px;
+  background: white;
+  color: var(--green-dark);
+  cursor: pointer;
+  font-weight: 800;
+}
+
 .primary-button:hover,
 .primary-button:focus-visible {
   background: var(--green-dark);
+}
+
+.secondary-button:hover,
+.secondary-button:focus-visible {
+  border-color: var(--green);
+  background: #f5fbf8;
+}
+
+.primary-button:disabled,
+.secondary-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.52;
 }
 
 .test-screen,
@@ -152,6 +175,7 @@ h1 {
 .question-list {
   display: grid;
   gap: 14px;
+  min-height: 340px;
 }
 
 .question-card,
@@ -216,12 +240,17 @@ h1 {
   accent-color: var(--green);
 }
 
-.submit-row {
+.question-nav {
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
   align-items: center;
   gap: 16px;
   margin-top: 22px;
+}
+
+.question-nav .warning {
+  flex: 1;
+  text-align: center;
 }
 
 .warning {
@@ -336,10 +365,15 @@ h1 {
   }
 
   .test-header,
-  .submit-row,
+  .question-nav,
   .part-row {
     flex-direction: column;
     align-items: stretch;
+  }
+
+  .question-nav .warning {
+    order: -1;
+    text-align: left;
   }
 
   .progress-pill {

@@ -12,6 +12,7 @@ const state = {
   bank: [],
   questions: [],
   answers: new Map(),
+  currentIndex: 0,
 };
 
 const startScreen = document.querySelector("#start-screen");
@@ -20,6 +21,8 @@ const resultsScreen = document.querySelector("#results-screen");
 const startButton = document.querySelector("#start-button");
 const restartButton = document.querySelector("#restart-button");
 const submitButton = document.querySelector("#submit-button");
+const previousButton = document.querySelector("#previous-button");
+const nextButton = document.querySelector("#next-button");
 const testForm = document.querySelector("#test-form");
 const answeredCount = document.querySelector("#answered-count");
 const submitWarning = document.querySelector("#submit-warning");
@@ -58,6 +61,7 @@ function selectQuestions() {
 
   state.questions = shuffle(selected);
   state.answers = new Map();
+  state.currentIndex = 0;
 }
 
 function setScreen(activeScreen) {
@@ -70,9 +74,10 @@ function renderQuestion(question, index) {
   const options = Object.entries(question.options)
     .map(([key, value]) => {
       const inputId = `question-${question.id}-${key}`;
+      const isChecked = state.answers.get(question.id) === key ? "checked" : "";
       return `
         <label class="option" for="${inputId}">
-          <input id="${inputId}" type="radio" name="question-${question.id}" value="${key}" required>
+          <input id="${inputId}" type="radio" name="question-${question.id}" value="${key}" ${isChecked} required>
           <span>${key}. ${value}</span>
         </label>
       `;
@@ -91,8 +96,13 @@ function renderQuestion(question, index) {
 }
 
 function renderTest() {
-  testForm.innerHTML = state.questions.map(renderQuestion).join("");
-  answeredCount.textContent = "0";
+  const currentQuestion = state.questions[state.currentIndex];
+
+  testForm.innerHTML = renderQuestion(currentQuestion, state.currentIndex);
+  answeredCount.textContent = String(state.answers.size);
+  previousButton.disabled = state.currentIndex === 0;
+  nextButton.classList.toggle("hidden", state.currentIndex === state.questions.length - 1);
+  submitButton.classList.toggle("hidden", state.currentIndex !== state.questions.length - 1);
   submitWarning.classList.add("hidden");
   setScreen(testScreen);
   window.scrollTo({ top: 0, behavior: "instant" });
@@ -101,6 +111,11 @@ function renderTest() {
 function updateAnsweredCount() {
   answeredCount.textContent = String(state.answers.size);
   submitWarning.classList.add("hidden");
+}
+
+function goToQuestion(index) {
+  state.currentIndex = Math.min(Math.max(index, 0), state.questions.length - 1);
+  renderTest();
 }
 
 function calculateResult() {
@@ -208,6 +223,14 @@ testForm.addEventListener("change", (event) => {
     state.answers.set(Number(card.dataset.questionId), event.target.value);
     updateAnsweredCount();
   }
+});
+
+previousButton.addEventListener("click", () => {
+  goToQuestion(state.currentIndex - 1);
+});
+
+nextButton.addEventListener("click", () => {
+  goToQuestion(state.currentIndex + 1);
 });
 
 submitButton.addEventListener("click", () => {
