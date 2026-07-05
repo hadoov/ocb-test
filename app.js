@@ -7,6 +7,7 @@ const REQUIRED_PARTS = [
 
 const VALUES_PART = "Part 4 - Australian values";
 const QUESTIONS_PER_PART = 5;
+const REMOTE_BANK_URL = "https://hadoov.github.io/ocb-test/bank.json";
 
 const state = {
   bank: [],
@@ -33,13 +34,33 @@ const reviewList = document.querySelector("#review-list");
 const startError = document.querySelector("#start-error");
 
 async function loadBank() {
-  const response = await fetch("bank.json");
+  const bankUrls = ["bank.json", REMOTE_BANK_URL];
+  let loadError = null;
 
-  if (!response.ok) {
-    throw new Error("Could not load the question bank.");
+  for (const bankUrl of bankUrls) {
+    try {
+      const response = await fetch(bankUrl, { cache: "no-cache" });
+
+      if (!response.ok) {
+        throw new Error(`Could not load ${bankUrl}.`);
+      }
+
+      state.bank = await response.json();
+      return;
+    } catch (error) {
+      loadError = error;
+    }
   }
 
-  state.bank = await response.json();
+  throw loadError ?? new Error("Could not load the question bank.");
+}
+
+function getBankErrorMessage() {
+  if (window.location.protocol === "file:") {
+    return "Could not load the question bank from this file. Open the app from GitHub Pages or a local web server, then try again.";
+  }
+
+  return "Could not load the question bank. Check that bank.json is available beside index.html, then refresh.";
 }
 
 function shuffle(items) {
@@ -189,7 +210,11 @@ function renderResults(result) {
 
       return `
         <article class="review-card ${isCorrect ? "correct" : "incorrect"}">
-          <p class="review-meta">Question ${index + 1} · ${question.part} · ${isCorrect ? "Correct" : "Incorrect"}</p>
+          <div class="review-meta" aria-label="Question review details">
+            <span class="review-pill">Question ${index + 1}</span>
+            <span class="review-pill">${question.part}</span>
+            <span class="review-pill ${isCorrect ? "success" : "danger"}">${isCorrect ? "Correct" : "Incorrect"}</span>
+          </div>
           <p><strong>${question.question}</strong></p>
           <p class="review-answer">Your answer: ${selectedAnswer}. ${selectedText}</p>
           ${isCorrect ? "" : `<p class="review-answer">Correct answer: ${question.answer}. ${correctText}</p>`}
@@ -215,7 +240,7 @@ async function startTest() {
     selectQuestions();
     renderTest();
   } catch (error) {
-    startError.textContent = "Could not load the question bank. Please refresh and try again.";
+    startError.textContent = getBankErrorMessage();
     startError.classList.remove("hidden");
     console.error(error);
   } finally {
