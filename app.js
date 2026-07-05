@@ -99,17 +99,21 @@ function renderTest() {
   const currentQuestion = state.questions[state.currentIndex];
 
   testForm.innerHTML = renderQuestion(currentQuestion, state.currentIndex);
-  answeredCount.textContent = String(state.answers.size);
-  previousButton.disabled = state.currentIndex === 0;
-  nextButton.classList.toggle("hidden", state.currentIndex === state.questions.length - 1);
-  submitButton.classList.toggle("hidden", state.currentIndex !== state.questions.length - 1);
+  updateNavigation();
   submitWarning.classList.add("hidden");
   setScreen(testScreen);
   window.scrollTo({ top: 0, behavior: "instant" });
 }
 
-function updateAnsweredCount() {
+function updateNavigation() {
+  const currentQuestion = state.questions[state.currentIndex];
+  const isLastQuestion = state.currentIndex === state.questions.length - 1;
+
   answeredCount.textContent = String(state.answers.size);
+  previousButton.disabled = state.currentIndex === 0;
+  nextButton.disabled = !state.answers.has(currentQuestion.id);
+  nextButton.classList.toggle("hidden", isLastQuestion);
+  submitButton.classList.toggle("hidden", !isLastQuestion);
   submitWarning.classList.add("hidden");
 }
 
@@ -221,7 +225,7 @@ testForm.addEventListener("change", (event) => {
   if (event.target instanceof HTMLInputElement && event.target.type === "radio") {
     const card = event.target.closest("[data-question-id]");
     state.answers.set(Number(card.dataset.questionId), event.target.value);
-    updateAnsweredCount();
+    updateNavigation();
   }
 });
 
