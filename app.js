@@ -88,7 +88,10 @@ function renderQuestion(question, index) {
     <article class="question-card" data-question-id="${question.id}">
       <div class="question-top">
         <span class="question-number">${index + 1}</span>
-        <p class="question-text">${question.question}</p>
+        <div>
+          <p class="question-count">Question ${index + 1} of ${state.questions.length}</p>
+          <p class="question-text">${question.question}</p>
+        </div>
       </div>
       <div class="options">${options}</div>
     </article>
@@ -186,7 +189,7 @@ function renderResults(result) {
 
       return `
         <article class="review-card ${isCorrect ? "correct" : "incorrect"}">
-          <p class="review-meta">Question ${index + 1} · ${isCorrect ? "Correct" : "Incorrect"}</p>
+          <p class="review-meta">Question ${index + 1} · ${question.part} · ${isCorrect ? "Correct" : "Incorrect"}</p>
           <p><strong>${question.question}</strong></p>
           <p class="review-answer">Your answer: ${selectedAnswer}. ${selectedText}</p>
           ${isCorrect ? "" : `<p class="review-answer">Correct answer: ${question.answer}. ${correctText}</p>`}
