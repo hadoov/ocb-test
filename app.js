@@ -27,6 +27,7 @@ const resultBanner = document.querySelector("#result-banner");
 const scoreSummary = document.querySelector("#score-summary");
 const partResults = document.querySelector("#part-results");
 const reviewList = document.querySelector("#review-list");
+const startError = document.querySelector("#start-error");
 
 async function loadBank() {
   const response = await fetch("bank.json");
@@ -182,6 +183,7 @@ function renderResults(result) {
 async function startTest() {
   startButton.disabled = true;
   startButton.textContent = "Loading...";
+  startError.classList.add("hidden");
 
   try {
     if (state.bank.length === 0) {
@@ -191,7 +193,8 @@ async function startTest() {
     selectQuestions();
     renderTest();
   } catch (error) {
-    startButton.textContent = "Could not load test";
+    startError.textContent = "Could not load the question bank. Please refresh and try again.";
+    startError.classList.remove("hidden");
     console.error(error);
   } finally {
     startButton.disabled = false;
