@@ -20,9 +20,12 @@ const state = {
 };
 
 const startScreen = document.querySelector("#start-screen");
+const bankReviewScreen = document.querySelector("#bank-review-screen");
 const testScreen = document.querySelector("#test-screen");
 const resultsScreen = document.querySelector("#results-screen");
 const startButton = document.querySelector("#start-button");
+const reviewBankButton = document.querySelector("#review-bank-button");
+const backToStartButton = document.querySelector("#back-to-start-button");
 const restartButton = document.querySelector("#restart-button");
 const submitButton = document.querySelector("#submit-button");
 const previousButton = document.querySelector("#previous-button");
@@ -35,6 +38,8 @@ const scoreSummary = document.querySelector("#score-summary");
 const partResults = document.querySelector("#part-results");
 const reviewList = document.querySelector("#review-list");
 const startError = document.querySelector("#start-error");
+const bankQuestionCount = document.querySelector("#bank-question-count");
+const bankReviewList = document.querySelector("#bank-review-list");
 
 async function loadBank() {
   const bankUrls = [BANK_FILE, LEGACY_BANK_FILE, REMOTE_BANK_URL, LEGACY_REMOTE_BANK_URL];
@@ -70,6 +75,15 @@ function normalizePartName(part) {
   return String(part).replace(/[‘’]/g, "'").trim();
 }
 
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
 function shuffle(items) {
   const shuffled = [...items];
 
@@ -98,9 +112,56 @@ function selectQuestions() {
 }
 
 function setScreen(activeScreen) {
-  [startScreen, testScreen, resultsScreen].forEach((screen) => {
+  [startScreen, bankReviewScreen, testScreen, resultsScreen].forEach((screen) => {
     screen.classList.toggle("hidden", screen !== activeScreen);
   });
+}
+
+function renderBankQuestion(question, index) {
+  const options = Object.entries(question.options)
+    .map(([key, value]) => {
+      const isCorrect = key === question.answer;
+
+      return `
+        <li class="bank-option ${isCorrect ? "is-correct" : ""}">
+          <span class="bank-option-key">${escapeHtml(key)}</span>
+          <span>${escapeHtml(value)}</span>
+          ${isCorrect ? `<span class="correct-badge">Correct answer</span>` : ""}
+        </li>
+      `;
+    })
+    .join("");
+
+  return `
+    <article class="bank-question-card">
+      <p class="bank-question-meta">Question ${index + 1}</p>
+      <h2>${escapeHtml(question.question)}</h2>
+      <ol class="bank-options">${options}</ol>
+    </article>
+  `;
+}
+
+function renderBankReview() {
+  bankQuestionCount.textContent = `${state.bank.length} questions`;
+  bankReviewList.innerHTML = REQUIRED_PARTS.map((part) => {
+    const questions = state.bank.filter((question) => normalizePartName(question.part) === normalizePartName(part));
+    const displayPart = questions[0]?.part ?? part;
+
+    return `
+      <section class="bank-part">
+        <div class="bank-part-header">
+          <h2>${escapeHtml(displayPart)}</h2>
+          <span>${questions.length} questions</span>
+        </div>
+        <div class="bank-questions">
+          ${questions.map(renderBankQuestion).join("")}
+        </div>
+      </section>
+    `;
+  }).join("");
+
+  setScreen(bankReviewScreen);
+  window.scrollTo({ top: 0, behavior: "instant" });
 }
 
 function renderQuestion(question, index) {
@@ -262,6 +323,27 @@ async function startTest() {
   }
 }
 
+async function showBankReview() {
+  reviewBankButton.disabled = true;
+  reviewBankButton.textContent = "Loading...";
+  startError.classList.add("hidden");
+
+  try {
+    if (state.bank.length === 0) {
+      await loadBank();
+    }
+
+    renderBankReview();
+  } catch (error) {
+    startError.textContent = getBankErrorMessage();
+    startError.classList.remove("hidden");
+    console.error(error);
+  } finally {
+    reviewBankButton.disabled = false;
+    reviewBankButton.textContent = "Review question bank";
+  }
+}
+
 testForm.addEventListener("change", (event) => {
   if (event.target instanceof HTMLInputElement && event.target.type === "radio") {
     const card = event.target.closest("[data-question-id]");
@@ -288,4 +370,6 @@ submitButton.addEventListener("click", () => {
 });
 
 startButton.addEventListener("click", startTest);
+reviewBankButton.addEventListener("click", showBankReview);
+backToStartButton.addEventListener("click", () => setScreen(startScreen));
 restartButton.addEventListener("click", startTest);

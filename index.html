@@ -19,8 +19,30 @@
           Answer 20 randomly selected questions. You need at least 75% overall and every
           Australian values question correct to pass.
         </p>
-        <button id="start-button" class="primary-button" type="button">Start test</button>
+        <div class="start-actions">
+          <button id="start-button" class="primary-button" type="button">Start test</button>
+          <button id="review-bank-button" class="secondary-button" type="button">Review question bank</button>
+        </div>
         <p id="start-error" class="warning hidden" role="alert"></p>
+      </section>
+
+      <section id="bank-review-screen" class="screen bank-review-screen hidden" aria-labelledby="bank-review-title">
+        <header class="bank-header">
+          <div>
+            <div class="brand-row compact">
+              <span class="mark" aria-hidden="true">AU</span>
+              <span>Question bank</span>
+            </div>
+            <h1 id="bank-review-title">Review questions</h1>
+          </div>
+          <div class="progress-pill" id="bank-question-count">0 questions</div>
+        </header>
+
+        <div class="bank-review-actions">
+          <button id="back-to-start-button" class="secondary-button" type="button">Back</button>
+        </div>
+
+        <div id="bank-review-list" class="bank-review-list"></div>
       </section>
 
       <section id="test-screen" class="screen hidden" aria-labelledby="test-title">

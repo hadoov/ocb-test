@@ -123,6 +123,17 @@ h1 {
   line-height: 1.5;
 }
 
+.start-actions {
+  width: min(100%, 450px);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.start-actions button {
+  flex: 1 1 170px;
+}
+
 .primary-button,
 .secondary-button {
   min-height: 50px;
@@ -178,11 +189,13 @@ h1 {
 }
 
 .test-screen,
-.results-screen {
+.results-screen,
+.bank-review-screen {
   padding: clamp(14px, 3vw, 28px);
 }
 
-.test-header {
+.test-header,
+.bank-header {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   align-items: start;
@@ -191,7 +204,8 @@ h1 {
 }
 
 .test-header h1,
-.results-screen h1 {
+.results-screen h1,
+.bank-header h1 {
   margin-top: 8px;
   font-size: clamp(1.75rem, 3.4vw, 2.55rem);
   line-height: 1.08;
@@ -217,7 +231,8 @@ h1 {
 }
 
 .question-card,
-.review-card {
+.review-card,
+.bank-question-card {
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--surface-strong);
@@ -470,6 +485,120 @@ h1 {
   margin-top: 8px !important;
 }
 
+.bank-review-actions {
+  display: flex;
+  justify-content: flex-start;
+  margin-bottom: 18px;
+}
+
+.bank-review-list {
+  display: grid;
+  gap: 26px;
+}
+
+.bank-part {
+  display: grid;
+  gap: 12px;
+}
+
+.bank-part-header {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 14px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--line);
+}
+
+.bank-part-header h2 {
+  margin: 0;
+  font-size: clamp(1.18rem, 2.4vw, 1.55rem);
+  line-height: 1.18;
+}
+
+.bank-part-header span {
+  flex: 0 0 auto;
+  color: var(--muted);
+  font-weight: 750;
+}
+
+.bank-questions {
+  display: grid;
+  gap: 12px;
+}
+
+.bank-question-card {
+  display: grid;
+  gap: 12px;
+}
+
+.bank-question-card h2 {
+  margin: 0;
+  font-size: 1.05rem;
+  line-height: 1.38;
+}
+
+.bank-question-meta {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 750;
+}
+
+.bank-options {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.bank-option {
+  min-height: 44px;
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfbfd;
+  line-height: 1.35;
+}
+
+.bank-option.is-correct {
+  border-color: rgba(52, 199, 89, 0.44);
+  background: rgba(52, 199, 89, 0.1);
+}
+
+.bank-option-key {
+  width: 24px;
+  height: 24px;
+  display: inline-grid;
+  place-items: center;
+  border-radius: 8px;
+  background: var(--surface-muted);
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-weight: 850;
+}
+
+.bank-option.is-correct .bank-option-key {
+  background: var(--success);
+  color: white;
+}
+
+.correct-badge {
+  justify-self: end;
+  border-radius: 999px;
+  padding: 4px 8px;
+  background: rgba(52, 199, 89, 0.14);
+  color: var(--success-text);
+  font-size: 0.76rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
 @media (max-width: 720px) {
   body {
     background:
@@ -511,18 +640,21 @@ h1 {
   }
 
   .test-screen,
-  .results-screen {
+  .results-screen,
+  .bank-review-screen {
     padding: 12px;
   }
 
-  .test-header {
+  .test-header,
+  .bank-header {
     grid-template-columns: 1fr;
     gap: 12px;
     margin-bottom: 12px;
   }
 
   .test-header h1,
-  .results-screen h1 {
+  .results-screen h1,
+  .bank-header h1 {
     margin-top: 8px;
     font-size: 1.65rem;
   }
@@ -541,7 +673,8 @@ h1 {
   }
 
   .question-card,
-  .review-card {
+  .review-card,
+  .bank-question-card {
     padding: 14px;
   }
 
@@ -623,6 +756,34 @@ h1 {
     gap: 5px;
   }
 
+  .bank-review-actions {
+    margin-bottom: 14px;
+  }
+
+  .bank-review-actions button {
+    width: 100%;
+  }
+
+  .bank-review-list {
+    gap: 22px;
+  }
+
+  .bank-part-header {
+    align-items: start;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .bank-option {
+    grid-template-columns: 26px minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .correct-badge {
+    grid-column: 2;
+    justify-self: start;
+  }
+
   #restart-button {
     width: 100%;
   }
@@ -647,7 +808,8 @@ h1 {
   }
 
   .test-header h1,
-  .results-screen h1 {
+  .results-screen h1,
+  .bank-header h1 {
     font-size: 1.5rem;
   }
 
