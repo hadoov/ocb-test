@@ -1,13 +1,16 @@
 const REQUIRED_PARTS = [
   "Part 1 - Australia and its people",
-  "Part 2 - Australia’s democratic beliefs, rights and liberties",
+  "Part 2 - Australia's democratic beliefs, rights and liberties",
   "Part 3 - Government and the law in Australia",
   "Part 4 - Australian values",
 ];
 
 const VALUES_PART = "Part 4 - Australian values";
 const QUESTIONS_PER_PART = 5;
-const REMOTE_BANK_URL = "https://hadoov.github.io/ocb-test/bank.json";
+const BANK_FILE = "bank_latest.json";
+const LEGACY_BANK_FILE = "bank.json";
+const REMOTE_BANK_URL = `https://hadoov.github.io/ocb-test/${BANK_FILE}`;
+const LEGACY_REMOTE_BANK_URL = `https://hadoov.github.io/ocb-test/${LEGACY_BANK_FILE}`;
 
 const state = {
   bank: [],
@@ -34,7 +37,7 @@ const reviewList = document.querySelector("#review-list");
 const startError = document.querySelector("#start-error");
 
 async function loadBank() {
-  const bankUrls = ["bank.json", REMOTE_BANK_URL];
+  const bankUrls = [BANK_FILE, LEGACY_BANK_FILE, REMOTE_BANK_URL, LEGACY_REMOTE_BANK_URL];
   let loadError = null;
 
   for (const bankUrl of bankUrls) {
@@ -60,7 +63,11 @@ function getBankErrorMessage() {
     return "Could not load the question bank from this file. Open the app from GitHub Pages or a local web server, then try again.";
   }
 
-  return "Could not load the question bank. Check that bank.json is available beside index.html, then refresh.";
+  return `Could not load the question bank. Check that ${BANK_FILE} is available beside index.html, then refresh.`;
+}
+
+function normalizePartName(part) {
+  return String(part).replace(/[‘’]/g, "'").trim();
 }
 
 function shuffle(items) {
@@ -76,7 +83,12 @@ function shuffle(items) {
 
 function selectQuestions() {
   const selected = REQUIRED_PARTS.flatMap((part) => {
-    const questionsForPart = state.bank.filter((question) => question.part === part);
+    const questionsForPart = state.bank.filter((question) => normalizePartName(question.part) === normalizePartName(part));
+
+    if (questionsForPart.length < QUESTIONS_PER_PART) {
+      throw new Error(`Not enough questions found for ${part}.`);
+    }
+
     return shuffle(questionsForPart).slice(0, QUESTIONS_PER_PART);
   });
 
@@ -148,7 +160,7 @@ function goToQuestion(index) {
 
 function calculateResult() {
   const byPart = REQUIRED_PARTS.map((part) => {
-    const questions = state.questions.filter((question) => question.part === part);
+    const questions = state.questions.filter((question) => normalizePartName(question.part) === normalizePartName(part));
     const correct = questions.filter((question) => state.answers.get(question.id) === question.answer).length;
     return { part, correct, total: questions.length };
   });
@@ -156,7 +168,7 @@ function calculateResult() {
   const totalCorrect = byPart.reduce((sum, part) => sum + part.correct, 0);
   const totalQuestions = state.questions.length;
   const percentage = Math.round((totalCorrect / totalQuestions) * 100);
-  const valuesResult = byPart.find((part) => part.part === VALUES_PART);
+  const valuesResult = byPart.find((part) => normalizePartName(part.part) === normalizePartName(VALUES_PART));
   const valuesPassed = valuesResult.correct === valuesResult.total;
   const overallPassed = percentage >= 75;
 
@@ -183,11 +195,12 @@ function renderScoreTile(label, value) {
 function renderResults(result) {
   resultBanner.className = `result-banner ${result.passed ? "pass" : "fail"}`;
   resultBanner.textContent = result.passed ? "Passed" : "Not passed";
+  const valuesResult = result.byPart.find((part) => normalizePartName(part.part) === normalizePartName(VALUES_PART));
 
   scoreSummary.innerHTML = [
     renderScoreTile("Overall score", `${result.totalCorrect}/${result.totalQuestions}`),
     renderScoreTile("Percentage", `${result.percentage}%`),
-    renderScoreTile("Australian values", result.valuesPassed ? "5/5" : `${result.byPart.find((part) => part.part === VALUES_PART).correct}/5`),
+    renderScoreTile("Australian values", result.valuesPassed ? "5/5" : `${valuesResult.correct}/5`),
   ].join("");
 
   partResults.innerHTML = result.byPart
